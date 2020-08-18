@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title>To Do List</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+  <div class="box" id="heading">
+    <h1><%= ListTitle %></h1>
+  </div>
+  <div class="box">
+    <ul>
+      <% for (var i = 0; i < newListItems.length; i++) { %>
+      <div class="item">
+        <input type="checkbox">
+        <p class="item"><%= newListItems[i] %></p>
+      </div>
+      <%  } %>
+    </ul>
+    <form class="" action="/" method="post">
+      <input type="text" name="newItem" placeholder="Add a new task" autocomplete="off">
+      <button type="submit" name="addButton" value=<%= ListTitle %>>+</button>
+    </form>
+  </div>
+
+  <footer>
+    Copyright, 2020.
+  </footer>
+</body>
+
+</html>
