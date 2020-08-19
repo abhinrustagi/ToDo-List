@@ -28,7 +28,7 @@ app.get("/", function(req, res) {
   var day = today.toLocaleDateString("en-US", options);
 
   res.render("list", {
-    ListTitle: "To Do List",
+    ListTitle: day,
     newListItems: items
   });
 });
