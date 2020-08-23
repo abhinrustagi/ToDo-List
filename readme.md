@@ -13,6 +13,8 @@ To run this project, clone the repository by either of the two methods:
 - Go to Code → Download ZIP, and extract the ZIP file.
 - Go to Terminal, and run the following command: <br>
 ```git clone https://github.com/abhinrustagi/ToDo-List.git```
+
+Then,
 - Run the following command: <br> ```node app.js```
 
 **Make sure you have node installed on your system.**
