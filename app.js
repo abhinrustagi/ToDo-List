@@ -2,11 +2,21 @@
 
 const express = require("express");
 const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
 
 const app = express();
 
-var items = ["Code", "Sleep", "Eat"];
-var workList = [];
+mongoose.connect("mongodb://localhost:27017/todolistDB", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
+
+const itemsSchema = {
+  name: String
+};
+
+const Item = mongoose.model("Item", itemsSchema);
+const WorkItem = mongoose.model("WorkItem", itemsSchema);
 
 app.use(bodyParser.urlencoded({
   extended: true
@@ -25,19 +35,24 @@ app.get("/", function(req, res) {
     month: "long"
   };
 
-  var day = today.toLocaleDateString("en-US", options);
-
-  res.render("list", {
-    ListTitle: day,
-    newListItems: items
+  Item.find({}, function(err, foundItems) {
+    res.render("list", {
+      ListTitle: day,
+      newListItems: foundItems
+    });
   });
+
+  var day = today.toLocaleDateString("en-US", options);
 });
 
 app.get("/work", function(req, res) {
-  res.render("list", {
-    ListTitle: "Work List",
-    newListItems: workList
-});
+
+  WorkItem.find({}, function(err, foundItems) {
+    res.render("list", {
+      ListTitle: "Work List",
+      newListItems: foundItems
+    });
+  });
 });
 
 app.post("/", function(req, res) {
@@ -45,12 +60,15 @@ app.post("/", function(req, res) {
   let item = req.body.newItem;
 
   if (req.body.addButton === "Work") {
-    workList.push(item);
+    WorkItem.insertMany([{
+      name: item
+    }]);
 
-    res.redirect("/work")
-  }
-  else {
-    items.push(item);
+    res.redirect("/work");
+  } else {
+    Item.insertMany([{
+      name: item
+    }]);
     res.redirect("/");
   }
 });
