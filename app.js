@@ -23,8 +23,14 @@ const itemsSchema = {
   name: String
 };
 
+const listSchema = {
+  name: String,
+  items: [itemsSchema]
+};
+
+const List = mongoose.model("List", listSchema);
+
 const Item = mongoose.model("Item", itemsSchema);
-const WorkItem = mongoose.model("WorkItem", itemsSchema);
 
 app.use(bodyParser.urlencoded({
   extended: true
@@ -78,37 +84,64 @@ app.get("/", function(req, res) {
   });
 });
 
-app.get("/work", function(req, res) {
+app.get("/:newList", function(req, res) {
+  const customListName = req.params.newList;
+  List.findOne({
+    name: customListName
+  }, function(err, foundList) {
+    if (!err) {
+      if (!foundList) {
+        console.log("Doesn't Exist!");
+        // Create a new list
+        const list = new List({
+          name: customListName,
+          items: defaultItems
+        });
+        list.save();
+        res.render("list", {
+          ListTitle: customListName,
+          newListItems: defaultItems
+        });
 
-  WorkItem.find({}, function(err, foundItems) {
-    if (err) {
-      console.log(err);
-    } else {
-      res.render("list", {
-        ListTitle: "Work List",
-        newListItems: foundItems
-      });
+      } else {
+        console.log("Already Exists!");
+        // Show an existing list
+        res.render("list", {
+          ListTitle: foundList.name,
+          newListItems: foundList.items
+        });
+      }
     }
+
   });
+
+
 
 });
 
 app.post("/", function(req, res) {
 
-  let item = req.body.newItem;
+  let itemName = req.body.newItem;
 
-  if (req.body.addButton === "Work") {
-    WorkItem.insertMany([{
-      name: item
-    }]);
+  const newItem = new Item({
+    name: itemName
+  });
 
-    res.redirect("/work");
-  } else {
-    Item.insertMany([{
-      name: item
-    }]);
-    res.redirect("/");
-  }
+  newItem.save();
+  res.redirect("/");
+});
+
+app.post("/delete", function(req, res) {
+  const deleteItem = req.body.checkbox;
+
+  Item.findByIdAndRemove(deleteItem, function(err) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log("Successfully deleted item.");
+      res.redirect("/");
+    }
+  });
 });
 
 app.listen(8888, function() {

@@ -15,13 +15,15 @@
   <div class="box">
     <ul>
       <%newListItems.forEach(function(item){%>
-        <div class="item">
-          <input type="checkbox">
-          <p class="item"><%= item.name %></p>
-        </div>
+        <form action="/delete" method="post">
+          <div class="item">
+            <input type="checkbox" name="checkbox" value="<%= item._id %>" onChange="this.form.submit()">
+            <p class="item"><%= item.name %></p>
+          </div>
+        </form>
       <% });%>
     </ul>
-    <form class="" action="/" method="post">
+    <form class="item" action="/" method="post">
       <input type="text" name="newItem" placeholder="Add a new task" autocomplete="off">
       <button type="submit" name="addButton" value=<%= ListTitle %>>+</button>
     </form>
