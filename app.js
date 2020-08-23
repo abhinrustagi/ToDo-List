@@ -3,6 +3,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const lodash = require("lodash");
 
 const app = express();
 
@@ -66,18 +67,8 @@ app.get("/", function(req, res) {
         }
       });
     } else {
-      var today = new Date();
-
-      var options = {
-        weekday: "long",
-        day: "numeric",
-        month: "long"
-      };
-
-      var day = today.toLocaleDateString("en-US", options);
-
       res.render("list", {
-        ListTitle: day,
+        ListTitle: "Today",
         newListItems: foundItems
       });
     }
@@ -85,7 +76,7 @@ app.get("/", function(req, res) {
 });
 
 app.get("/:newList", function(req, res) {
-  const customListName = req.params.newList;
+  const customListName = lodash.capitalize(req.params.newList);
   List.findOne({
     name: customListName
   }, function(err, foundList) {
@@ -115,33 +106,67 @@ app.get("/:newList", function(req, res) {
 
   });
 
-
-
 });
 
 app.post("/", function(req, res) {
 
   let itemName = req.body.newItem;
+  let listName = req.body.addButton;
+
+  console.log(listName);
 
   const newItem = new Item({
     name: itemName
   });
 
-  newItem.save();
-  res.redirect("/");
+  if (listName === "Today") {
+    newItem.save();
+    res.redirect("/");
+  } else {
+    List.findOne({
+      name: listName
+    }, function(err, foundList) {
+      if (err) {
+        console.log(err);
+      } else {
+        foundList.items.push(newItem);
+        foundList.save();
+        res.redirect("/" + listName);
+      }
+    });
+  }
+
 });
 
 app.post("/delete", function(req, res) {
   const deleteItem = req.body.checkbox;
+  const listName = req.body.listName;
 
-  Item.findByIdAndRemove(deleteItem, function(err) {
-    if (err) {
-      console.log(err);
-    } else {
-      console.log("Successfully deleted item.");
-      res.redirect("/");
-    }
-  });
+  if (listName === "Today") {
+    Item.findByIdAndRemove(deleteItem, function(err) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("Successfully deleted item.");
+        res.redirect("/");
+      }
+    });
+  } else {
+    List.findOneAndUpdate({
+      name: listName
+    }, {
+      $pull: {
+        items: {
+          _id: deleteItem
+        }
+      }
+    }, function(err, foundList) {
+      if (!err) {
+        res.redirect("/" + listName);
+      }
+    });
+  }
+
 });
 
 app.listen(8888, function() {
